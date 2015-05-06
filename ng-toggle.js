@@ -3,6 +3,7 @@ ngToggle
     .directive('ngToggle', ['$timeout', function($timeout) {
         return {
             restrict: 'E',
+            require: '^ngModel',
             replace: true,
             scope: {
                 config: '=?',
@@ -21,7 +22,7 @@ ngToggle
                 borderRadius: '=?'
             },
             template: '<div class="ng-toggle-wrap" ng-style="styleWrap" ng-class="{\'vertical\': vertical}"><div class="ng-toggle-switch" ng-style="styleSwitch" ng-class="{\'true\': val==ngTrueVal, \'false\': val==ngFalseVal}" ng-click="toggle()"><div class="ng-toggle-false"></div><div class="ng-toggle-true"></div><div class="ng-toggle-handle" ng-style="styleHandle"></div></div><div class="ng-toggle-tooltip" ng-show="tooltip"><span ng-class="{\'active\': showTooltip1}"><span ng-show="tooltip1"></span>{{tooltip1}}&nbsp;&bull;</span><br ng-show="triToggle"><span ng-class="{\'active\': showTooltip2}" ng-show="triToggle"><span ng-show="tooltip2"></span>{{tooltip2}}&nbsp;&bull;</span><br><span ng-class="{\'active\': showTooltip3}"><span ng-show="tooltip3"></span>{{tooltip3}}&nbsp;&bull;</span></div></div>',
-            link: function(scope, element, attrs) {
+            link: function(scope, element, attrs, ctrl) {
 
                 /* Catch Config, allow attr overrides */
 
@@ -314,6 +315,18 @@ ngToggle
                         });
                     }
                 }, true);
+
+		/* Validation:
+		 * Honor required and ng-required attributes */
+
+                ctrl.$validators.ngToggle = function(value) {
+                  var required = attrs['required'] || attrs['ngRequired'] === true;
+                  if (required && (angular.equals(value, scope.ngFalseVal) ||
+				   angular.equals(value, scope.ngNullVal))) {
+                      return false;
+                  }
+		  return true;
+                };
 
                 /* Value Configuration */
 
